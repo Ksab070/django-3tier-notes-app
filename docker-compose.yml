@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+    image: nginx
+    container_name: nginx_cont
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - notes-app-network
+    depends_on:
+      - django
+
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_cont
+    command: sh -c "python manage.py migrate --no-input && gunicorn notesapp.wsgi --bind 0.0.0.0:8000"
+    environment:
+      - DB_NAME=three-tier-app
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    restart: always
+    networks:
+      - notes-app-network
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql_cont
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=three-tier-app
+    volumes:
+      - ./three-tier-db:/var/lib/mysql
+    networks:
+      - notes-app-network
+
+
+networks:
+  notes-app-network:
+
