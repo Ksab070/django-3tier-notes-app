@@ -46,7 +46,7 @@ services:
       - MYSQL_PASSWORD=root
       - MYSQL_DATABASE=three-tier-app
     volumes:
-      - ./three-tier-db:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     networks:
       - notes-app-network
 
@@ -54,3 +54,5 @@ services:
 networks:
   notes-app-network:
 
+volumes:
+  mysql-data:
